@@ -3,7 +3,7 @@
 
 
 ### Equipo:
-- Armando Jair Ibañez Parra - C19400437
+- Armando Jair Ibañez Parra
 - Kennby Brayan González Domínguez
 - José raúl Fletes Méndez
 - Adileni Ramírez López
