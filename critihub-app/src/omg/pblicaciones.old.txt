@@ -1,0 +1,126 @@
+<script>
+    import { collection, query, where, onSnapshot } from "firebase/firestore";
+    import { db } from "$lib/firebase.js";
+    import { Grid, h } from "gridjs";
+    import "gridjs/dist/theme/mermaid.css";
+    import { onMount } from "svelte";
+    let selected = 0;
+
+    let items = [];
+
+  const q = query(
+    collection(db, "Publicaciones"),
+    where("categoria", "==", "Peliculas")
+  );
+
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const aItems = [];
+    querySnapshot.forEach((doc) => {
+      let i = [doc.id, doc.data().titulo, doc.data().categoria, doc.data().rating];
+      aItems.push(i);
+    });
+    items = [...aItems];
+    // Llamar a la función para inicializar Grid.js después de que se actualicen los datos
+    initializeGrid();
+  });
+
+  let tablaGJS;
+
+  function initializeGrid() {
+    if (tablaGJS) {
+      tablaGJS.innerHTML = ''; // Limpia el contenido previo si es necesario
+    }
+    
+    new Grid({
+      columns: [
+        "ID",
+        "Titulo",
+        "Categoria",
+        "Rating",
+        {
+          name: "Actions",
+          formatter: (cell, row) => {
+            return h(
+              "div",
+              { className: "actions-container" },
+              h(
+                "button",
+                {
+                  className: "btn warning",
+                  onClick: () => editAction(row),
+                },
+                "Edit"
+              ),
+              h(
+                "button",
+                {
+                  className: "btn danger",
+                  onClick: () => deleteAction(row),
+                },
+                "Delete"
+              )
+            );
+          },
+        },
+      ],
+      search: true,
+      sort: true,
+      fixedHeader: true,
+      className: {
+        td: "my-custom-td-class",
+        table: "custom-table-classname",
+      },
+      pagination: {
+        limit: 5,
+      },
+      data: items,
+    }).render(tablaGJS);
+  }
+</script>
+
+<div class="crud-contenedor">
+    <div class="menu-acciones">
+        <h2>Lista de publicaciones</h2>
+        <div>
+            <button
+                class="btn secondary"
+                on:click={() => {
+                    
+                }}>Agregar</button
+            >
+        </div>
+    </div>
+    <div class="wrapper" bind:this={tablaGJS}></div>
+    
+</div>
+
+<style>
+    .crud-contenedor {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        box-shadow: 1px 1px 20px 0px rgba(93, 93, 93, 0.75);
+        border-radius: 0.5rem;
+        padding: 5px;
+    }
+
+    .btn {
+        color: rgb(54, 54, 54);
+        font-weight: 700;
+        margin-left: 0.3rem;
+    }
+
+    .menu-acciones {
+        display: flex;
+        column-gap: 15px;
+        justify-content: space-between;
+        margin: 10px 15px;
+    }
+
+    .lista {
+        height: 100%;
+        width: 100%;
+        overflow: auto;
+    }
+</style>
